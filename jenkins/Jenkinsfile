@@ -3,7 +3,6 @@ pipeline {
     environment {
         CI = 'true'
         NODE_OPTIONS = '--openssl-legacy-provider'
-        HOST = '0.0.0.0'
     }
     stages {
         stage('Clean Workspace') {
@@ -60,13 +59,8 @@ pipeline {
             }
         }
     }
-   // Only clean workspace after confirming app access
     post {
-        success {
-            input message: 'Ready to clean workspace?'
-            cleanWs()
-        }
-        failure {
+        always {
             cleanWs()
         }
     }
