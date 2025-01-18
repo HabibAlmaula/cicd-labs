@@ -3,8 +3,7 @@ pipeline {
     {
         docker {
             image 'node:^18.0.0'
-            args '-u root -p 3000:3000'
-
+            args '-p 3000:3000 -u root --network jenkins'
         }
     }
     environment {
