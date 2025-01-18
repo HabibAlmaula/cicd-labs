@@ -20,7 +20,8 @@ echo 'of the previously run process (i.e. "npm start") and writes this value to'
 echo 'the file ".pidfile".'
 
 set -x
-pnpm start &
+# Use HOST=0.0.0.0 to make it accessible from outside the container
+HOST=0.0.0.0 pnpm start &
 sleep 1
 echo $! > .pidfile
 set +x
