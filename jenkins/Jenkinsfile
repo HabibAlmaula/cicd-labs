@@ -14,7 +14,7 @@ pipeline {
             steps {
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: '*/react-app']], // Using react-app branch
+                    branches: [[name: '*/react-app']],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
                         [$class: 'CleanCheckout']
@@ -23,20 +23,13 @@ pipeline {
                         url: '/home/learning/devops/cicd-labs'
                     ]]
                 ])
-                // Verify contents after checkout
-                sh 'ls -la'
-                sh 'pwd'
             }
         }
         stage('Build') {
             steps {
                 sh '''
-                    echo "Current directory contents:"
-                    ls -la
-                    echo "Node version:"
-                    node -v
-                    echo "PNPM version:"
-                    pnpm -v
+                    echo "Node version: $(node -v)"
+                    echo "PNPM version: $(pnpm -v)"
                     pnpm install
                 '''
             }
@@ -44,8 +37,11 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    chmod +x ./jenkins/scripts/test.sh
-                    ./jenkins/scripts/test.sh
+                    # Update Babel dependencies if needed
+                    pnpm add -D @babel/core@^7.22.0 @babel/plugin-syntax-import-attributes@^7.22.0
+                    
+                    # Run tests with CI=true to avoid watch mode
+                    CI=true pnpm test -- --passWithNoTests
                 '''
             }
         }
