@@ -1,29 +1,49 @@
 pipeline {
     agent {
         docker {
-            image 'node:lts-buster-slim'
+            image 'node:18-buster-slim'  // Using Node.js 18 instead of 20
             args '-p 3000:3000'
         }
     }
     environment {
         CI = 'true'
+        NODE_OPTIONS = '--openssl-legacy-provider'  // Add this if you still want to use Node.js 20
     }
     stages {
+        stage('Setup PNPM') {
+            steps {
+                sh 'npm install -g pnpm'
+                sh 'pnpm setup'
+                sh '''
+                    node -v
+                    pnpm -v
+                '''
+            }
+        }
         stage('Build') {
             steps {
-                sh 'npm install'
+                sh 'pnpm install'
             }
         }
         stage('Test') {
             steps {
-                sh './jenkins/scripts/test.sh'
+                sh '''
+                    chmod +x ./jenkins/scripts/test.sh
+                    ./jenkins/scripts/test.sh
+                '''
             }
         }
         stage('Deliver') {
             steps {
-                sh './jenkins/scripts/deliver.sh'
+                sh '''
+                    chmod +x ./jenkins/scripts/deliver.sh
+                    ./jenkins/scripts/deliver.sh
+                '''
                 input message: 'Finished using the website? (Click "Proceed" to continue)'
-                sh './jenkins/scripts/kill.sh'
+                sh '''
+                    chmod +x ./jenkins/scripts/kill.sh
+                    ./jenkins/scripts/kill.sh
+                '''
             }
         }
     }
