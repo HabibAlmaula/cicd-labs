@@ -1,27 +1,13 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:18-buster-slim'
-            args '-p 3000:3000'
-        }
-    }
+    agent any
     environment {
         CI = 'true'
-        // Use a local directory for pnpm installation
-        PNPM_HOME = '/tmp/pnpm'
-        PATH = "${env.PNPM_HOME}:${env.PATH}"
+        NODE_OPTIONS = '--openssl-legacy-provider'
     }
     stages {
-        stage('Setup PNPM') {
+        stage('Clean Workspace') {
             steps {
-                // Install pnpm using corepack (available in Node.js 16+)
-                sh '''
-                    corepack enable
-                    corepack prepare pnpm@latest --activate
-                    pnpm setup
-                    echo "Node version: $(node -v)"
-                    echo "PNPM version: $(pnpm -v)"
-                '''
+                cleanWs()
             }
         }
         stage('Build') {
