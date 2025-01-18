@@ -1,8 +1,15 @@
 pipeline {
-    agent any
+    agent 
+    {
+        docker {
+            image 'node:18'
+            args '-p 3000:3000 -u root --network jenkins'
+        }
+    }
     environment {
         CI = 'true'
         NODE_OPTIONS = '--openssl-legacy-provider'
+        HOST = '0.0.0.0'
     }
     stages {
         stage('Clean Workspace') {
@@ -59,8 +66,13 @@ pipeline {
             }
         }
     }
+   // Only clean workspace after confirming app access
     post {
-        always {
+        success {
+            input message: 'Ready to clean workspace?'
+            cleanWs()
+        }
+        failure {
             cleanWs()
         }
     }
