@@ -20,9 +20,9 @@ echo 'of the previously run process (i.e. "npm start") and writes this value to'
 echo 'the file ".pidfile".'
 
 set -x
-# Use HOST=0.0.0.0 to make it accessible from outside the container
-HOST=0.0.0.0 pnpm start &
-sleep 1
+# Use serve package to serve the build directory
+pnpm add -g serve
+serve -s build -l 3000 --host 0.0.0.0 &
 echo $! > .pidfile
 set +x
 

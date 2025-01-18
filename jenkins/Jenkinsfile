@@ -1,20 +1,13 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:18-alpine'  // Using a specific version is better than ^18.0.0
-            args '-p 3000:3000 -u root --network jenkins -v ${WORKSPACE}:/workspace'  // Added workspace mounting
-        }
-    }
+    agent any
     environment {
         CI = 'true'
         NODE_OPTIONS = '--openssl-legacy-provider'
-        HOME = '.'  // Ensure npm/pnpm can write to the current directory
     }
     stages {
         stage('Clean Workspace') {
             steps {
-                // Using shell commands instead of cleanWs()
-                sh 'rm -rf *'
+                cleanWs()
             }
         }
         stage('Checkout') {
@@ -27,8 +20,7 @@ pipeline {
                         [$class: 'CleanCheckout']
                     ],
                     userRemoteConfigs: [[
-                        // Use the absolute path or preferably a proper Git URL
-                        url: 'file:///home/learning/devops/cicd-labs'
+                        url: '/home/learning/devops/cicd-labs'
                     ]]
                 ])
             }
@@ -36,10 +28,6 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    # Install pnpm if not available
-                    if ! command -v pnpm &> /dev/null; then
-                        npm install -g pnpm
-                    fi
                     echo "Node version: $(node -v)"
                     echo "PNPM version: $(pnpm -v)"
                     pnpm install
@@ -73,8 +61,7 @@ pipeline {
     }
     post {
         always {
-            // Using shell commands instead of cleanWs()
-            sh 'rm -rf *'
+            cleanWs()
         }
     }
 }
